@@ -3,184 +3,515 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>TaeBank Admin</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Sarabun:wght@400;500;600&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+    <title>TaeBank - Wealth Manager Console</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Sarabun:wght@300;400;500;600&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <style>
-        body { background: #070B19; color: #F0F6FC; font-family: 'Sarabun'; user-select: none; }
-        .font-num { font-family: 'Outfit'; } .font-eng { font-family: 'Cinzel'; }
-        .page-view { display: none; min-height: 100dvh; width: 100%; } .page-view.active { display: flex; flex-direction: column; }
-        .glass-panel { background: #121C33; border: 1px solid #1E2B4D; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
-        .input-luxe { background: #0B1121; border: 1px solid #1E2B4D; color: #FFF; border-radius: 12px; padding: 14px; width: 100%; outline: none; }
-        .input-luxe:focus { border-color: #D4AF37; }
-        .btn-gold { background: linear-gradient(135deg, #BF953F, #FCF6BA, #B38728); color: #000; border-radius: 12px; padding: 14px; font-weight: bold; width: 100%; cursor: pointer; }
-        .member-card { background: #121C33; border: 1px solid #1E2B4D; border-radius: 16px; padding: 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
-        .mini-btn { background: #0B1121; border: 1px solid #1E2B4D; border-radius: 8px; height: 36px; display: flex; align-items: center; justify-content: center; color: #8B9BB4; width: 100%; cursor: pointer; }
-        .swal2-popup { border-radius: 20px !important; background: #121C33 !important; color: #FFF !important; border: 1px solid #1E2B4D !important; }
+        /* --- QUIET LUXURY VARIABLES --- */
+        :root {
+            --bg-body: #F7F5F0; /* Soft Alabaster / Cream */
+            --bg-surface: #FFFFFF;
+            --text-main: #2C303A;
+            --text-muted: #8E929B;
+            --gold-primary: #C49A45;
+            --gold-grad: linear-gradient(135deg, #E2C275 0%, #D4AF37 50%, #B38728 100%);
+            --border-light: #F0EDE5;
+        }
+
+        body {
+            font-family: 'Sarabun', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .font-eng { font-family: 'Cinzel', serif; }
+        .font-num { font-family: 'Outfit', sans-serif; }
+        
+        .text-gold { color: var(--gold-primary); }
+        .bg-gold { background: var(--gold-grad); color: #fff; }
+
+        /* Panels */
+        .glass-box {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-light);
+            border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+            transition: all 0.3s ease;
+        }
+
+        /* Inputs */
+        .input-light {
+            background: #F9FAFB; border: 1px solid #E5E7EB; color: var(--text-main); transition: 0.3s; width: 100%;
+        }
+        .input-light:focus { border-color: var(--gold-primary); outline: none; background: #fff; box-shadow: 0 0 0 3px rgba(196, 154, 69, 0.1); }
+
+        /* User Card (Mobile Optimized) */
+        .user-card {
+            background: #FFFFFF;
+            border: 1px solid var(--border-light);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+        }
+        .user-card:active { transform: scale(0.98); border-color: var(--gold-primary); }
+
+        .btn-action {
+            background: rgba(196, 154, 69, 0.1);
+            color: var(--gold-primary);
+            border: 1px solid rgba(196, 154, 69, 0.2);
+            border-radius: 10px; padding: 8px 14px;
+            font-size: 13px; font-weight: 600;
+            display: flex; align-items: center; gap: 6px;
+            transition: 0.2s;
+        }
+        .btn-action:active { background: var(--gold-primary); color: white; }
+
+        /* Custom SweetAlert */
+        .swal2-popup { border-radius: 24px !important; box-shadow: 0 20px 50px rgba(0,0,0,0.1) !important; border: 1px solid var(--border-light) !important; }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-body); }
+        ::-webkit-scrollbar-thumb { background: #D1D5DB; border-radius: 3px; }
+
+        .chart-container { position: relative; height: 260px; width: 100%; }
     </style>
 </head>
-<body>
+<body class="pb-10">
 
-    <div id="page-login" class="page-view active items-center justify-center p-6">
-        <div class="glass-panel p-8 w-full max-w-sm text-center border-t-2 border-[#D4AF37]">
-            <div class="w-20 h-20 mx-auto mb-6 bg-[#0B1121] rounded-full flex items-center justify-center border border-[#1E2B4D]"><i class="fas fa-shield-halved text-4xl text-[#D4AF37]"></i></div>
-            <h2 class="text-2xl font-eng tracking-[4px]">ADMIN</h2>
-            <div class="mt-8 flex flex-col gap-4">
-                <input type="password" id="adminPin" placeholder="Enter PIN" class="input-luxe text-center text-xl font-num tracking-[10px]">
-                <button id="btnLogin" class="btn-gold">AUTHORIZE</button>
+    <div id="loginSection" class="fixed inset-0 bg-[var(--bg-body)] z-50 flex items-center justify-center p-6">
+        <div class="glass-box p-10 w-full max-w-sm text-center">
+            <div class="w-20 h-20 mx-auto mb-5 bg-white rounded-full flex items-center justify-center shadow-sm border border-gray-100">
+                <i class="fas fa-crown text-4xl text-[#C49A45]"></i>
             </div>
+            <h2 class="text-2xl font-eng text-[var(--text-main)] mb-1 tracking-[4px]">MANAGEMENT</h2>
+            <p class="text-xs text-[var(--text-muted)] mb-8 font-num tracking-widest uppercase">Admin Authorization</p>
+            
+            <input type="password" id="pass" placeholder="Enter PIN" class="input-light p-4 rounded-xl text-center text-xl font-num tracking-[10px] mb-6">
+            <button onclick="doLogin()" class="w-full bg-gold py-4 rounded-xl font-medium tracking-wider text-sm font-outfit shadow-md">AUTHORIZE ACCESS</button>
         </div>
     </div>
 
-    <div id="page-main" class="page-view pb-10">
-        <div class="w-full max-w-3xl mx-auto p-4 md:p-6 flex flex-col gap-5">
-            <header class="flex justify-between items-center glass-panel p-4">
-                <div class="flex items-center gap-3"><i class="fas fa-crown text-[#D4AF37] text-2xl ml-2"></i><div><h1 class="text-lg font-bold font-eng">TAEBANK</h1></div></div>
-                <button onclick="location.reload()" class="w-10 h-10 rounded-full bg-[#0B1121] text-[#8B9BB4] border border-[#1E2B4D]"><i class="fas fa-power-off"></i></button>
-            </header>
+    <div id="mainApp" class="hidden w-full max-w-3xl mx-auto p-4 md:p-6 flex flex-col gap-6">
+        
+        <header class="flex justify-between items-center glass-box p-5">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-full bg-[#C49A45]/10 flex items-center justify-center text-[#C49A45]">
+                    <i class="fas fa-shield-alt text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold text-[var(--text-main)] font-eng tracking-widest">TAEBANK <span class="text-[#C49A45] text-[9px] border border-[#C49A45] px-1.5 py-0.5 rounded-full ml-1 font-sans">ADMIN</span></h1>
+                    <p class="text-[10px] text-[var(--text-muted)] mt-0.5">พระมหาจักรภัทร คมฺภีรญาณเมธี</p>
+                </div>
+            </div>
+            <button onclick="location.reload()" class="w-10 h-10 rounded-full bg-gray-50 text-[var(--text-muted)] flex items-center justify-center border border-gray-200 hover:bg-red-50 hover:text-red-500 hover:border-red-200 transition-all">
+                <i class="fas fa-sign-out-alt"></i>
+            </button>
+        </header>
 
-            <div class="grid grid-cols-2 gap-4">
-                <div class="glass-panel p-5"><p class="text-[10px] text-[#D4AF37]">Total Assets</p><h3 id="stat-balance" class="text-2xl font-bold font-num mt-1">0.00</h3></div>
-                <div class="glass-panel p-5"><p class="text-[10px] text-[#D4AF37]">Members</p><h3 id="stat-members" class="text-2xl font-bold font-num mt-1">0</h3></div>
+        <div class="grid grid-cols-2 gap-4">
+            <div class="glass-box p-6 relative overflow-hidden group">
+                <div class="absolute -right-4 -bottom-4 opacity-5 text-7xl"><i class="fas fa-gem"></i></div>
+                <p class="text-[10px] text-[#C49A45] font-eng tracking-widest mb-2 font-semibold">Total Assets</p>
+                <h3 id="totalSystemBalance" class="text-3xl font-semibold text-[var(--text-main)] font-num tracking-tight">0.00</h3>
+                <p class="text-[10px] text-[var(--text-muted)] mt-1 font-medium">ยอดเงินรวมทั้งธนาคาร</p>
+            </div>
+            <div class="glass-box p-6 relative overflow-hidden">
+                <div class="absolute -right-4 -bottom-4 opacity-5 text-7xl"><i class="fas fa-users"></i></div>
+                <p class="text-[10px] text-[#C49A45] font-eng tracking-widest mb-2 font-semibold">Active Members</p>
+                <h3 id="totalMembers" class="text-3xl font-semibold text-[var(--text-main)] font-num tracking-tight">0</h3>
+                <p class="text-[10px] text-[var(--text-muted)] mt-1 font-medium">บัญชีในระบบทั้งหมด</p>
+            </div>
+        </div>
+
+        <div class="glass-box p-5 md:p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-sm font-bold text-[var(--text-main)] font-eng tracking-widest"><i class="fas fa-chart-pie text-[#C49A45] mr-2"></i> Wealth Distribution</h3>
+                <span class="text-[10px] text-[#C49A45] bg-[#C49A45]/10 px-3 py-1 rounded-full font-medium">สัดส่วนเงินฝาก (%)</span>
+            </div>
+            <div class="chart-container">
+                <canvas id="financeChart"></canvas>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+            <button onclick="window.openAddModal()" class="glass-box p-4 flex flex-col items-center justify-center gap-2 hover:border-[#C49A45] transition-all">
+                <div class="w-10 h-10 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center mb-1"><i class="fas fa-user-plus text-lg"></i></div>
+                <span class="text-xs font-semibold text-[var(--text-main)]">เพิ่มสมาชิกใหม่</span>
+            </button>
+            <label class="glass-box p-4 flex flex-col items-center justify-center gap-2 hover:border-[#C49A45] transition-all cursor-pointer">
+                <div class="w-10 h-10 rounded-full bg-green-50 text-green-600 flex items-center justify-center mb-1"><i class="fas fa-file-excel text-lg"></i></div>
+                <span class="text-xs font-semibold text-[var(--text-main)]">นำเข้าไฟล์ CSV</span>
+                <input type="file" id="csvInput" accept=".csv" class="hidden" onchange="importCSV(this)">
+            </label>
+        </div>
+
+        <div class="glass-box p-5 md:p-6 min-h-[400px]">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                <h3 class="text-sm font-bold text-[var(--text-main)] font-eng tracking-widest"><i class="fas fa-address-book text-[#C49A45] mr-2"></i> Client Accounts</h3>
+                <div class="relative w-full sm:w-64">
+                    <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                    <input type="text" id="search" oninput="doSearch()" placeholder="ค้นหาชื่อ หรือ เลขบัญชี..." class="input-light pl-11 pr-4 py-2.5 rounded-xl text-sm">
+                </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-4">
-                <button id="btnAdd" class="glass-panel p-4 flex gap-2 items-center justify-center text-blue-400"><i class="fas fa-plus-circle"></i> เพิ่มบัญชี</button>
-                <label class="glass-panel p-4 flex gap-2 items-center justify-center text-green-400 cursor-pointer"><i class="fas fa-file-excel"></i> นำเข้า CSV<input type="file" id="btnImport" accept=".csv" class="hidden"></label>
-            </div>
-
-            <div class="glass-panel p-5 min-h-[400px]">
-                <input type="text" id="searchInput" placeholder="ค้นหาบัญชี..." class="input-luxe text-sm mb-4">
-                <div id="listContainer"></div>
+            <div id="tableBody" class="space-y-0">
+                </div>
+            
+            <div id="emptyState" class="hidden py-12 text-center text-[var(--text-muted)]">
+                <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-3 border border-gray-100">
+                    <i class="fas fa-inbox text-2xl text-gray-300"></i>
+                </div>
+                <p class="text-sm font-medium">ไม่พบข้อมูลสมาชิกในระบบ</p>
             </div>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
-        import { getDatabase, ref, push, set, update, onValue, remove } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+        import { getDatabase, ref, push, set, onValue, remove, get } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
-        const app = initializeApp({
-            apiKey: "AIzaSyAiCtKW-U5QWp3yUsvToJlh2pT7sjiQ4Iw", authDomain: "taebankwat.firebaseapp.com",
-            databaseURL: "https://taebankwat-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "taebankwat",
-            storageBucket: "taebankwat.firebasestorage.app", messagingSenderId: "134684838871", appId: "1:134684838871:web:4b47416599ed4ce95c5992"
-        });
+        const firebaseConfig = {
+            apiKey: "AIzaSyAiCtKW-U5QWp3yUsvToJlh2pT7sjiQ4Iw",
+            authDomain: "taebankwat.firebaseapp.com",
+            databaseURL: "https://taebankwat-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "taebankwat",
+            storageBucket: "taebankwat.firebasestorage.app",
+            messagingSenderId: "134684838871",
+            appId: "1:134684838871:web:4b47416599ed4ce95c5992"
+        };
+
+        const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
         
-        let DB_STATE = { members: {}, transactions: {} };
-        const pass = "2598";
+        let membersData = [];
+        let txData = [];
+        let myChart = null; 
+        
+        const ADMIN_PASS = "2598";
 
-        // Login Logic
-        const loginFn = () => {
-            if (document.getElementById('adminPin').value === pass) {
-                document.getElementById('page-login').classList.remove('active');
-                document.getElementById('page-main').classList.add('active');
-                fetchDB();
-            } else Swal.fire({ icon: 'error', title: 'รหัสผิด' });
+        window.doLogin = () => {
+            const input = document.getElementById('pass').value;
+            if(input === ADMIN_PASS) {
+                document.getElementById('loginSection').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('loginSection').classList.add('hidden');
+                    document.getElementById('mainApp').classList.remove('hidden');
+                    initData();
+                }, 400);
+            } else {
+                Swal.fire({ icon: 'error', title: 'ACCESS DENIED', background: '#fff', color: '#2C303A', confirmButtonColor: '#C49A45' });
+            }
         };
-        document.getElementById('btnLogin').addEventListener('click', loginFn);
-        document.getElementById('adminPin').addEventListener('keyup', (e) => { if(e.key === 'Enter') loginFn(); });
 
-        function fetchDB() {
-            onValue(ref(db, 'members'), s => { DB_STATE.members = s.val() || {}; renderUI(); });
-            onValue(ref(db, 'transactions'), s => { DB_STATE.transactions = s.val() || {}; renderUI(); });
+        function initData() {
+            onValue(ref(db, 'members'), (snap) => {
+                membersData = snap.val() ? Object.values(snap.val()) : [];
+                onValue(ref(db, 'transactions'), (tSnap) => {
+                    // เก็บคีย์ของ transaction ไว้ด้วยเผื่อต้องลบ
+                    const txObj = tSnap.val() || {};
+                    txData = Object.keys(txObj).map(key => ({
+                        id: key,
+                        ...txObj[key]
+                    }));
+                    render();
+                    updateChart(); 
+                });
+            });
         }
 
-        function renderUI() {
-            const search = document.getElementById('searchInput').value.toLowerCase().trim();
-            const list = document.getElementById('listContainer');
-            let tBal = 0; let tMem = 0; list.innerHTML = '';
-
-            Object.keys(DB_STATE.members).sort().forEach(key => {
-                const m = DB_STATE.members[key];
-                if (search && !key.includes(search) && !(m.nick||'').toLowerCase().includes(search) && !(m.name||'').toLowerCase().includes(search)) return;
-
-                tMem++; let mBal = 0;
-                Object.keys(DB_STATE.transactions).forEach(txId => {
-                    const tx = DB_STATE.transactions[txId];
-                    if (tx.studentCode === key) mBal += (tx.type === 'deposit' ? parseFloat(tx.amount) : -parseFloat(tx.amount));
+        // --- DRAW DOUGHNUT CHART (สัดส่วนเงินฝาก) ---
+        function updateChart() {
+            const ctx = document.getElementById('financeChart').getContext('2d');
+            
+            let memberBalances = [];
+            membersData.forEach(m => {
+                let bal = 0;
+                txData.filter(t => t.studentCode === m.code).forEach(t => {
+                    bal += (t.type === 'deposit' ? parseFloat(t.amount) : -parseFloat(t.amount));
                 });
-                tBal += mBal;
+                if(bal > 0) {
+                    memberBalances.push({ name: m.nick || m.name, balance: bal });
+                }
+            });
 
-                const card = document.createElement('div'); card.className = 'member-card';
-                card.innerHTML = `
-                    <div class="flex-1 pr-2">
-                        <span class="font-num text-[11px] text-[#D4AF37] px-2 py-0.5 rounded bg-[#D4AF37]/10">${key}</span>
-                        <h4 class="font-bold text-base mt-1">${m.nick || '-'}</h4>
-                        <p class="text-[11px] text-[#8B9BB4] truncate">${m.name || '-'}</p>
-                        <div class="mt-2 text-[20px] font-num font-bold ${mBal >= 0 ? 'text-[#10B981]' : 'text-[#EF4444]'}">฿${mBal.toLocaleString()}</div>
-                    </div>
-                    <div class="flex flex-col gap-2 w-28">
-                        <button class="bg-[#D4AF37]/10 text-[#D4AF37] py-2 rounded-lg font-bold text-xs btn-tx"><i class="fas fa-bolt"></i> รายการ</button>
-                        <div class="flex gap-1">
-                            <button class="mini-btn btn-hist"><i class="fas fa-history"></i></button>
-                            <button class="mini-btn btn-edit text-blue-400"><i class="fas fa-pen"></i></button>
-                            <button class="mini-btn btn-del text-red-400"><i class="fas fa-trash"></i></button>
+            memberBalances.sort((a,b) => b.balance - a.balance);
+
+            const labels = memberBalances.map(m => m.name);
+            const data = memberBalances.map(m => m.balance);
+
+            // สีสันแบบพรีเมียม (ผู้ดี ขาวสว่าง)
+            const bgColors = [
+                '#C49A45', '#94A3B8', '#A0522D', '#2E8B57', '#4169E1',
+                '#9966CC', '#E87A5D', '#4B5563', '#00CED1', '#F472B6',
+                '#8B5CF6', '#10B981', '#F59E0B', '#6366F1', '#14B8A6'
+            ];
+
+            if(myChart) myChart.destroy();
+
+            if(data.length === 0) {
+                labels.push('ยังไม่มียอดเงิน');
+                data.push(1);
+                bgColors.unshift('#E5E7EB');
+            }
+
+            myChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: bgColors,
+                        borderWidth: 3,
+                        borderColor: '#FFFFFF', // ขอบขาวให้กลืนกับพื้นหลัง
+                        hoverOffset: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '70%', 
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: { color: '#6B7280', font: {family: 'Sarabun', size: 12, weight: 500}, boxWidth: 12, padding: 15, usePointStyle: true }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(255,255,255,0.95)',
+                            titleColor: '#2C303A',
+                            bodyColor: '#4B5563',
+                            titleFont: { family: 'Sarabun', size: 14, weight: 'bold' },
+                            bodyFont: { family: 'Outfit', size: 14 },
+                            padding: 12,
+                            borderColor: '#E5E7EB',
+                            borderWidth: 1,
+                            boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+                            callbacks: {
+                                label: function(context) {
+                                    if(data.length === 1 && labels[0] === 'ยังไม่มียอดเงิน') return ' 0 บาท';
+                                    const value = context.raw;
+                                    const total = context.chart._metasets[context.datasetIndex].total;
+                                    const percentage = ((value / total) * 100).toFixed(1) + '%';
+                                    return ` ฿${value.toLocaleString()} (${percentage})`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // --- RENDER MEMBER LIST ---
+        function render(data = membersData) {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+            
+            let totalSys = 0;
+            document.getElementById('totalMembers').innerText = membersData.length;
+
+            if(data.length === 0) document.getElementById('emptyState').classList.remove('hidden');
+            else document.getElementById('emptyState').classList.add('hidden');
+
+            data.sort((a,b) => a.code - b.code).forEach(m => {
+                let bal = 0;
+                txData.filter(t => t.studentCode === m.code).forEach(t => {
+                    bal += (t.type === 'deposit' ? parseFloat(t.amount) : -parseFloat(t.amount));
+                });
+                totalSys += bal;
+
+                // ทำความสะอาดรหัสก่อนใส่ในปุ่ม (ป้องกันบัคลบไม่ได้)
+                const safeCode = String(m.code).replace(/['"\\]/g, '').trim();
+
+                tbody.innerHTML += `
+                    <div class="user-card">
+                        <div class="flex-1">
+                            <div class="flex items-baseline gap-2 mb-1">
+                                <span class="font-num text-[11px] text-[#C49A45] font-semibold tracking-[2px] bg-[#C49A45]/10 px-2 py-0.5 rounded-md">${safeCode}</span>
+                            </div>
+                            <h4 class="font-bold text-[16px] text-[var(--text-main)] leading-tight mt-1">${m.nick}</h4>
+                            <p class="text-[11px] text-[var(--text-muted)] truncate w-40">${m.name}</p>
+                            <div class="mt-2.5 text-xl font-num font-semibold ${bal >= 0 ? 'text-[#059669]' : 'text-[#DC2626]'}">
+                                ฿${bal.toLocaleString()}
+                            </div>
+                        </div>
+                        
+                        <div class="flex flex-col gap-2.5">
+                            <button onclick="window.openTxModal('${safeCode}', '${m.nick}')" class="btn-action justify-center">
+                                <i class="fas fa-bolt text-[#C49A45]"></i> ทำรายการ
+                            </button>
+                            <div class="flex gap-2">
+                                <button onclick="window.openEditModal('${safeCode}', '${m.nick}', '${m.name}')" class="flex-1 bg-gray-50 border border-gray-200 rounded-lg py-2 text-blue-500 hover:bg-blue-500 hover:text-white transition"><i class="fas fa-pen text-[11px]"></i></button>
+                                <button onclick="window.del('${safeCode}')" class="flex-1 bg-gray-50 border border-gray-200 rounded-lg py-2 text-red-500 hover:bg-red-500 hover:text-white transition"><i class="fas fa-trash text-[11px]"></i></button>
+                            </div>
                         </div>
                     </div>
                 `;
-
-                card.querySelector('.btn-tx').addEventListener('click', async () => {
-                    const res = await Swal.fire({ title: `ทำรายการ: ${m.nick}`, showDenyButton: true, confirmButtonText: 'ฝากเข้า', confirmButtonColor: '#10B981', denyButtonText: 'ถอนออก', denyButtonColor: '#EF4444' });
-                    if(res.isConfirmed || res.isDenied) {
-                        const amt = await Swal.fire({ title: 'ระบุจำนวนเงิน', input: 'number' });
-                        if(amt.value) await push(ref(db, 'transactions'), { studentCode: key, type: res.isConfirmed ? 'deposit':'withdraw', amount: parseFloat(amt.value), date: new Date().toISOString() });
-                    }
-                });
-
-                card.querySelector('.btn-hist').addEventListener('click', () => {
-                    let hHTML = `<div class="max-h-60 overflow-y-auto">`;
-                    Object.keys(DB_STATE.transactions).filter(txId => DB_STATE.transactions[txId].studentCode === key).forEach(txId => {
-                        const t = DB_STATE.transactions[txId]; const isDep = t.type==='deposit';
-                        hHTML += `<div class="flex justify-between border-b border-[#1E2B4D] py-2 text-sm">
-                            <span class="${isDep?'text-green-400':'text-red-400'}">${isDep?'ฝาก':'ถอน'} ${t.amount} ฿</span>
-                            <button class="text-red-500" onclick="window.delTx('${txId}')"><i class="fas fa-times"></i> ลบ</button>
-                        </div>`;
-                    });
-                    Swal.fire({ title: 'ประวัติ', html: hHTML + '</div>', showConfirmButton: false });
-                });
-
-                card.querySelector('.btn-edit').addEventListener('click', async () => {
-                    const res = await Swal.fire({ html: `<input id="enick" class="input-luxe mb-2" value="${m.nick}"><input id="ename" class="input-luxe" value="${m.name}">`, preConfirm: () => [document.getElementById('enick').value, document.getElementById('ename').value] });
-                    if(res.value) await update(ref(db, 'members/'+key), { nick: res.value[0], name: res.value[1] });
-                });
-
-                card.querySelector('.btn-del').addEventListener('click', async () => {
-                    if((await Swal.fire({title:'ลบถาวร?', showCancelButton:true, confirmButtonColor:'#EF4444'})).isConfirmed) {
-                        await remove(ref(db, 'members/'+key));
-                        Object.keys(DB_STATE.transactions).forEach(async txId => { if(DB_STATE.transactions[txId].studentCode===key) await remove(ref(db, 'transactions/'+txId)); });
-                    }
-                });
-
-                list.appendChild(card);
             });
-            document.getElementById('stat-members').innerText = tMem;
-            document.getElementById('stat-balance').innerText = tBal.toLocaleString();
+            document.getElementById('totalSystemBalance').innerText = totalSys.toLocaleString(undefined, {minimumFractionDigits:2});
         }
 
-        window.delTx = async (txId) => { await remove(ref(db, 'transactions/'+txId)); Swal.close(); };
-        document.getElementById('searchInput').addEventListener('input', renderUI);
-
-        document.getElementById('btnAdd').addEventListener('click', async () => {
-            const res = await Swal.fire({ html: `<input id="scode" class="input-luxe mb-2" placeholder="เลขบัญชี"><input id="snick" class="input-luxe mb-2" placeholder="ชื่อเล่น"><input id="sname" class="input-luxe" placeholder="ชื่อจริง">`, preConfirm: () => [document.getElementById('scode').value.replace(/[^a-zA-Z0-9]/g,''), document.getElementById('snick').value, document.getElementById('sname').value] });
-            if(res.value && res.value[0]) await set(ref(db, 'members/'+res.value[0]), { nick: res.value[1], name: res.value[2] });
-        });
-
-        document.getElementById('btnImport').addEventListener('change', (e) => {
-            Papa.parse(e.target.files[0], { header: true, complete: async (res) => {
-                for(let r of res.data) {
-                    const code = String(r.เลขที่บัญชี||'').replace(/\s/g,'').replace(/[^a-zA-Z0-9]/g,'');
-                    if(!code) continue;
-                    await set(ref(db, 'members/'+code), { nick: r['นมัสการ สามเณร..']||'', name: r.ชื่อจริง||'' });
-                    const amt = parseFloat(String(r.ยอดคงเหลือ||'').replace(/,/g,''));
-                    if(amt>0) await push(ref(db, 'transactions'), { studentCode: code, type: 'deposit', amount: amt, date: new Date().toISOString() });
+        // --- ACTIONS ---
+        window.openTxModal = async (code, nick) => {
+            const result = await Swal.fire({
+                title: `<span style="font-family:'Sarabun'; color:#C49A45; font-size:1.3rem; font-weight:bold;">ทำรายการ: ${nick}</span>`,
+                text: 'เลือกประเภทรายการที่ต้องการ',
+                background: '#fff', color: '#2C303A',
+                showDenyButton: true, showCancelButton: true,
+                confirmButtonText: '<i class="fas fa-arrow-down"></i> ฝากเงินเข้า',
+                confirmButtonColor: '#10B981',
+                denyButtonText: '<i class="fas fa-arrow-up"></i> ถอนเงินออก',
+                denyButtonColor: '#EF4444',
+                cancelButtonText: 'ยกเลิก',
+                cancelButtonColor: '#F3F4F6',
+                customClass: { 
+                    actions: 'flex flex-col gap-3 w-full px-6', 
+                    confirmButton: 'w-full shadow-sm', 
+                    denyButton: 'w-full m-0 shadow-sm', 
+                    cancelButton: 'w-full m-0 text-gray-500 font-semibold border border-gray-200' 
                 }
-                Swal.fire('สำเร็จ'); e.target.value='';
-            }});
-        });
+            });
+
+            if (result.isConfirmed || result.isDenied) {
+                const isDeposit = result.isConfirmed;
+                const { value: amount } = await Swal.fire({
+                    title: `<span style="font-family:'Sarabun'; font-size:1.2rem; font-weight:bold;">ระบุจำนวนเงิน${isDeposit?'ฝาก':'ถอน'}</span>`,
+                    input: 'number',
+                    inputAttributes: { min: 1, placeholder: '0.00' },
+                    background: '#fff', color: '#2C303A',
+                    confirmButtonText: 'ยืนยันรายการ', confirmButtonColor: '#C49A45',
+                    customClass: { input: 'text-center font-num text-3xl text-[#C49A45] bg-gray-50 border-gray-200 font-semibold' },
+                    inputValidator: (value) => { if (!value || value <= 0) return 'กรุณาใส่จำนวนเงินที่ถูกต้อง!' }
+                });
+
+                if (amount) {
+                    await push(ref(db, 'transactions'), {
+                        studentCode: code, type: isDeposit ? 'deposit' : 'withdraw',
+                        amount: amount, date: new Date().toISOString()
+                    });
+                    Swal.fire({ icon: 'success', title: 'บันทึกสำเร็จ', text: `${isDeposit?'+':'-'} ${parseFloat(amount).toLocaleString()} ฿`, timer: 1500, showConfirmButton: false, background:'#fff', color:'#2C303A' });
+                }
+            }
+        };
+
+        window.openAddModal = async () => {
+            const { value: formValues } = await Swal.fire({
+                title: '<span style="font-family:\'Sarabun\'; font-weight:bold;">เพิ่มบัญชีใหม่</span>',
+                background: '#fff', color: '#2C303A',
+                html: `
+                    <input id="swal-code" class="swal2-input input-light font-num tracking-widest text-center font-semibold" placeholder="เลขบัญชี 6 หลัก">
+                    <input id="swal-nick" class="swal2-input input-light text-center" placeholder="ชื่อเล่น (ฉายา)">
+                    <input id="swal-name" class="swal2-input input-light text-center text-sm" placeholder="ชื่อจริง-นามสกุล">
+                `,
+                confirmButtonText: 'สร้างบัญชี', confirmButtonColor: '#C49A45',
+                preConfirm: () => [ document.getElementById('swal-code').value.trim(), document.getElementById('swal-nick').value.trim(), document.getElementById('swal-name').value.trim() ]
+            });
+
+            if (formValues && formValues[0]) {
+                const [code, nick, name] = formValues;
+                // ทำความสะอาดรหัส ป้องกันบัคการลบ
+                const cleanCode = code.replace(/[^a-zA-Z0-9]/g, '');
+                if(cleanCode) {
+                    await set(ref(db, 'members/' + cleanCode), { code: cleanCode, nick, name });
+                    Swal.fire({ icon: 'success', title: 'เพิ่มบัญชีแล้ว', timer: 1000, showConfirmButton: false, background:'#fff' });
+                }
+            }
+        };
+
+        window.openEditModal = async (code, oldNick, oldName) => {
+            const { value: formValues } = await Swal.fire({
+                title: '<span style="font-family:\'Sarabun\'; font-weight:bold;">แก้ไขข้อมูล</span>',
+                background: '#fff', color: '#2C303A',
+                html: `
+                    <input id="edit-nick" class="swal2-input input-light" value="${oldNick}">
+                    <input id="edit-name" class="swal2-input input-light text-sm" value="${oldName}">
+                `,
+                confirmButtonText: 'อัปเดต', confirmButtonColor: '#3B82F6',
+                preConfirm: () => [ document.getElementById('edit-nick').value, document.getElementById('edit-name').value ]
+            });
+
+            if (formValues) {
+                await set(ref(db, 'members/' + code), { code, nick: formValues[0], name: formValues[1] });
+                Swal.fire({ icon: 'success', title: 'อัปเดตแล้ว', timer: 1000, showConfirmButton: false, background:'#fff' });
+            }
+        };
+
+        // 💥 ลบข้อมูลแบบหมดจด (ล้างบัค)
+        window.del = (code) => {
+            const cleanCode = String(code).trim();
+            Swal.fire({
+                title: '<span style="font-family:\'Sarabun\'; font-weight:bold;">ยืนยันการลบบัญชี?</span>', 
+                text: "ข้อมูลเงินฝากและประวัติทั้งหมดจะหายไป", 
+                icon: 'warning',
+                background: '#fff', color: '#2C303A', 
+                showCancelButton: true, confirmButtonColor: '#EF4444', confirmButtonText: 'ลบทิ้งถาวร',
+                cancelButtonText: 'ยกเลิก', cancelButtonColor: '#E5E7EB',
+                customClass: { cancelButton: 'text-gray-700 font-semibold' }
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    try {
+                        // 1. ลบชื่อจากสมาชิก
+                        await remove(ref(db, 'members/' + cleanCode));
+                        
+                        // 2. ตามไปลบประวัติการเงินทั้งหมดของคนคนนี้ (Database Cleanup)
+                        const userTxs = txData.filter(t => t.studentCode === cleanCode);
+                        for(let t of userTxs) {
+                            await remove(ref(db, 'transactions/' + t.id));
+                        }
+
+                        Swal.fire({title:'ลบเรียบร้อย', icon:'success', timer:1000, showConfirmButton:false, background:'#fff'});
+                    } catch(e) {
+                        console.error(e);
+                        Swal.fire('ข้อผิดพลาด', 'ไม่สามารถลบได้ ลองใหม่อีกครั้ง', 'error');
+                    }
+                }
+            });
+        };
+
+        // CSV Import พร้อมระบบซักล้างข้อมูล (Sanitize)
+        window.importCSV = (input) => {
+            const file = input.files[0];
+            if (!file) return;
+            Papa.parse(file, {
+                header: true,
+                complete: async (results) => {
+                    let count = 0;
+                    for (const row of results.data) {
+                        if (row.เลขที่บัญชี) {
+                            // ล้างข้อมูลขยะและอักขระซ่อนเร้นจาก Excel
+                            const code = row.เลขที่บัญชี.toString().trim().replace(/[^a-zA-Z0-9]/g, '');
+                            if(!code) continue;
+
+                            await set(ref(db, 'members/' + code), { code: code, nick: row['นมัสการ สามเณร..'] || '', name: row.ชื่อจริง || '' });
+                            if (row.ยอดคงเหลือ) {
+                                await push(ref(db, 'transactions'), { studentCode: code, type: 'deposit', amount: parseFloat(row.ยอดคงเหลือ.replace(/,/g, '')), date: new Date().toISOString() });
+                            }
+                            count++;
+                        }
+                    }
+                    Swal.fire({ title: 'นำเข้าสำเร็จ', text: `อัปเดตข้อมูล ${count} รายการ`, icon: 'success', background: '#fff', color: '#2C303A', confirmButtonColor: '#C49A45' });
+                    input.value = ''; // รีเซ็ตไฟล์
+                }
+            });
+        };
+
+        window.doSearch = () => {
+            const t = document.getElementById('search').value.toLowerCase();
+            const filtered = membersData.filter(m => m.code.includes(t) || m.nick.toLowerCase().includes(t) || m.name.toLowerCase().includes(t));
+            render(filtered);
+        };
     </script>
 </body>
 </html>
